@@ -195,7 +195,9 @@ class _ChatScreenState extends State<ChatScreen> {
               // O widget "StreamBuilder" vai executar novamente o atributo "builder" sempre que houver alteração no valor do atributo "stream"
               // Neste caso ele será atualizado sempre que houver alteração no documento "message" do banco de dados
               child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: _firebaseIsInitialized == FirebaseCoreStatus.ok ? FirebaseFirestore.instance.collection('messages').snapshots() : null,
+                stream: _firebaseIsInitialized == FirebaseCoreStatus.ok
+                    ? FirebaseFirestore.instance.collection('messages').orderBy('createAt', descending: true).snapshots()
+                    : null,
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.none:
