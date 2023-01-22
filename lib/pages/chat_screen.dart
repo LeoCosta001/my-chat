@@ -226,14 +226,14 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
         ],
       ),
-      body: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              // O widget "StreamBuilder" vai executar novamente o atributo "builder" sempre que houver alteração no valor do atributo "stream"
-              // Neste caso ele será atualizado sempre que houver alteração no documento "message" do banco de dados
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            // O widget "StreamBuilder" vai executar novamente o atributo "builder" sempre que houver alteração no valor do atributo "stream"
+            // Neste caso ele será atualizado sempre que houver alteração no documento "message" do banco de dados
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: _firebaseIsInitialized == FirebaseCoreStatus.ok
                     ? FirebaseFirestore.instance.collection('messages').orderBy('createAt', descending: true).snapshots()
@@ -270,15 +270,15 @@ class _ChatScreenState extends State<ChatScreen> {
                 },
               ),
             ),
-            // TODO: Passar logica de upload/sendMessage para dentro de um componente
-            _imageUploadProgress != null ? LinearProgressIndicator(value: _imageUploadProgress! / 100) : Container(),
-            TextComposer(
-              _sendMessage,
-              isLogged: _currentUser != null,
-              onPressLoginButton: () => _getUser(),
-            ),
-          ],
-        ),
+          ),
+          // TODO: Passar logica de upload/sendMessage para dentro de um componente... Quando ele é atualizado a tela toda é renderizada novamente
+          _imageUploadProgress != null ? LinearProgressIndicator(value: _imageUploadProgress! / 100) : Container(),
+          TextComposer(
+            _sendMessage,
+            isLogged: _currentUser != null,
+            onPressLoginButton: () => _getUser(),
+          ),
+        ],
       ),
     );
   }
