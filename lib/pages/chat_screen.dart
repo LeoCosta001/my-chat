@@ -184,8 +184,38 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text('My Chat'),
+        title: currentUser == null
+            ? const Text('My Chat')
+            : Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: CircleAvatar(
+                      backgroundImage: NetworkImage(currentUser?.photoURL ?? ''),
+                    ),
+                  ),
+                  Text('${currentUser?.displayName}'),
+                ],
+              ),
         elevation: 0,
+        actions: [
+          if (currentUser != null)
+            IconButton(
+              onPressed: () {
+                // Deslogar do firebase e google
+                FirebaseAuth.instance.signOut();
+                googleSignIn.signOut();
+
+                // OBS: Esta é a forma de exibir o snackbar com o "BuildContext"
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Successfully logout'),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.exit_to_app),
+            ),
+        ],
       ),
       body: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12),
