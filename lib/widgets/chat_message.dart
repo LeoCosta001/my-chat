@@ -49,24 +49,51 @@ class ChatMessage extends StatelessWidget {
                       // Define se o conteúdo do balão será alinhado á direita ou esquerda
                       crossAxisAlignment: isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                       children: [
-                        // Nome do usuário
-                        if (!isSender)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 4),
-                            child: Text(
-                              '~ ${data['userName']} - ${DateTime.fromMillisecondsSinceEpoch(data['createAt']).hour}:${DateTime.fromMillisecondsSinceEpoch(data['createAt']).minute}',
-                              style: const TextStyle(
-                                color: Colors.green,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
+                        // Nome do usuário e/ou hora
+                        // if (!isSender)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            isSender
+                                ? '${DateTime.fromMillisecondsSinceEpoch(data['createAt']).hour}:${DateTime.fromMillisecondsSinceEpoch(data['createAt']).minute} ~'
+                                : '~ ${data['userName']} - ${DateTime.fromMillisecondsSinceEpoch(data['createAt']).hour}:${DateTime.fromMillisecondsSinceEpoch(data['createAt']).minute}',
+                            style: TextStyle(
+                              color: isSender ? Colors.white : Colors.green,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
+                        ),
                         // Conteúdo de imagem
                         if (data['imageUrl'] != null)
                           Image.network(
                             data['imageUrl'],
-                            width: 250,
+                            height: 150,
+                            // Define uma tamanho para o componente antes mesmo da imagem começar a ser carregada
+                            cacheHeight: 150,
+                            // Exibe um loading durante o carregamento da imagem
+                            loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                              if (loadingProgress == null) {
+                                return child;
+                              }
+                              return Container(
+                                width: 150,
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: isSender ? Colors.white10 : Colors.black12,
+                                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                                ),
+                                child: Center(
+                                  // Exibe um indicador de progresso de acordo com o que já foi carregado
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    value: loadingProgress.expectedTotalBytes != null
+                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                        : null,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         // Conteúdo de texto
                         if (data['text'] != null)

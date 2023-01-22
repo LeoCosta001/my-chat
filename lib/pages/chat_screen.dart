@@ -29,7 +29,8 @@ class _ChatScreenState extends State<ChatScreen> {
   final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
   // States
-  User? currentUser;
+  User? _currentUser;
+  double? _imageUploadProgress;
 
   // Status
   FirebaseCoreStatus _firebaseIsInitialized = FirebaseCoreStatus.waiting;
@@ -54,7 +55,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // Sempre que tiver alguma alteração relacionada a autenticação atual do usuário no firebase esta função de callback será executada
     FirebaseAuth.instance.userChanges().listen((User? user) {
       setState(() {
-        currentUser = user;
+        _currentUser = user;
       });
     });
   }
@@ -62,7 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
   // Obtem o acesso de um usuário a partir da conta google
   // OBS: Fazendo uma função/fluxo dessa forma faz com que sempre que o usuário estiver expirado sejá obtido um novo acesso
   Future<User?> _getUser() async {
-    if (currentUser != null) return currentUser;
+    if (_currentUser != null) return _currentUser;
 
     try {
       // Obtem as informações de usuário de alguém que fez login com o google
@@ -130,21 +131,31 @@ class _ChatScreenState extends State<ChatScreen> {
       Reference storageRef = FirebaseStorage.instance.ref().child(filePath);
       UploadTask uploadTask = storageRef.putFile(File(imageFile.path));
 
+      finishImageUpload() {
+        setState(() {
+          _imageUploadProgress = null;
+        });
+      }
+
       // Action by upload state
       uploadTask.snapshotEvents.listen((TaskSnapshot taskSnapshot) {
         switch (taskSnapshot.state) {
           case TaskState.running:
             final progress = 100.0 * (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes);
-            print("Upload is $progress% complete.");
+            setState(() {
+              _imageUploadProgress = progress;
+            });
             break;
           case TaskState.paused:
             print("Upload is paused.");
             break;
           case TaskState.canceled:
             print("Upload was canceled");
+            finishImageUpload();
             break;
           case TaskState.error:
             // Handle unsuccessful uploads
+            finishImageUpload();
             break;
           case TaskState.success:
             // Handle successful uploads on complete
@@ -153,6 +164,7 @@ class _ChatScreenState extends State<ChatScreen> {
               messagePayload['imageUrl'] = value;
               _createNewMessage(messagePayload);
             });
+            finishImageUpload();
             break;
         }
       });
@@ -184,22 +196,22 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: currentUser == null
+        title: _currentUser == null
             ? const Text('My Chat')
             : Row(
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: CircleAvatar(
-                      backgroundImage: NetworkImage(currentUser?.photoURL ?? ''),
+                      backgroundImage: NetworkImage(_currentUser?.photoURL ?? ''),
                     ),
                   ),
-                  Text('${currentUser?.displayName}'),
+                  Text('${_currentUser?.displayName}'),
                 ],
               ),
         elevation: 0,
         actions: [
-          if (currentUser != null)
+          if (_currentUser != null)
             IconButton(
               onPressed: () {
                 // Deslogar do firebase e google
@@ -248,7 +260,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           itemBuilder: ((context, index) {
                             return ChatMessage(
                               messageList[index].data(),
-                              messageList[index].data()['uid'] == currentUser?.uid,
+                              messageList[index].data()['uid'] == _currentUser?.uid,
                             );
                           }),
                         );
@@ -261,6 +273,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 },
               ),
             ),
+            // TODO: Passar logica de upload/sendMessage para dentro de um componente
+            _imageUploadProgress != null ? LinearProgressIndicator(value: _imageUploadProgress! / 100) : Container(),
             TextComposer(_sendMessage),
           ],
         ),
