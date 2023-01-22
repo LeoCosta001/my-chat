@@ -68,30 +68,27 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       // Obtem as informações de usuário de alguém que fez login com o google
       final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+      if (googleSignInAccount == null) return null;
 
-      // TODO: Create validation
-      if (googleSignInAccount != null) {
-        // Extrair os tokens de autenticação de login
-        final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+      // Extrair os tokens de autenticação de login
+      final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
 
-        // Cria uma credencial para autenticação de login no Firebase Authentication
-        // OBS: Para fazer login com outras contas (facebook, twitter, etc) tambem será usado um método para criar credencial (nos outros casos não será o "GoogleAuthProvider")
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          idToken: googleSignInAuthentication.idToken,
-          accessToken: googleSignInAuthentication.accessToken,
-        );
+      // Cria uma credencial para autenticação de login no Firebase Authentication
+      // OBS: Para fazer login com outras contas (facebook, twitter, etc) tambem será usado um método para criar credencial (nos outros casos não será o "GoogleAuthProvider")
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        idToken: googleSignInAuthentication.idToken,
+        accessToken: googleSignInAuthentication.accessToken,
+      );
 
-        // Faz login no Firebase Authentication com ama credencial
-        // OBS: Para fazer login com outras contas (facebook, twitter, etc) usa credenciais desta mesma forma)
-        final UserCredential authResult = await FirebaseAuth.instance.signInWithCredential(credential);
+      // Faz login no Firebase Authentication com ama credencial
+      // OBS: Para fazer login com outras contas (facebook, twitter, etc) usa credenciais desta mesma forma)
+      final UserCredential authResult = await FirebaseAuth.instance.signInWithCredential(credential);
 
-        // Obtem os dados do usuário logado
-        final User? user = authResult.user;
+      // Obtem os dados do usuário logado
+      final User? user = authResult.user;
 
-        return user;
-      }
+      return user;
     } catch (error) {
-      // print(error);
       return null;
     }
   }
@@ -275,7 +272,11 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             // TODO: Passar logica de upload/sendMessage para dentro de um componente
             _imageUploadProgress != null ? LinearProgressIndicator(value: _imageUploadProgress! / 100) : Container(),
-            TextComposer(_sendMessage),
+            TextComposer(
+              _sendMessage,
+              isLogged: _currentUser != null,
+              onPressLoginButton: () => _getUser(),
+            ),
           ],
         ),
       ),
