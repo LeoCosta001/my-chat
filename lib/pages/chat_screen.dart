@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:my_chat/widgets/chat_message.dart';
 import 'package:my_chat/widgets/text_composer.dart';
 
 enum FirebaseCoreStatus {
@@ -208,7 +209,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     default:
                       if (snapshot.data != null) {
                         List<QueryDocumentSnapshot<Map<String, dynamic>>> messageList = snapshot.data!.docs;
-                        messageList.sort((a, b) => b['createAt'].compareTo(a['createAt']));
 
                         // A renderização da lista é realizada com o widget "ListView.builder" para que seja rrenderizado em tela apenas o que está sendo visto atualmente pelo usuário
                         return ListView.builder(
@@ -216,10 +216,9 @@ class _ChatScreenState extends State<ChatScreen> {
                           // Faz a lista começar de baixo para cima (no caso as mensagens)
                           reverse: true,
                           itemBuilder: ((context, index) {
-                            late String? messageText = messageList[index].data()['text'];
-                            late String? messageImage = messageList[index].data()['imageUrl'];
-                            return ListTile(
-                              title: Text('${messageText ?? messageImage}'),
+                            return ChatMessage(
+                              messageList[index].data(),
+                              messageList[index].data()['uid'] == currentUser?.uid,
                             );
                           }),
                         );

@@ -43,6 +43,7 @@ dependencies:
   firebase_storage:
   firebase_auth:
   firebase_core:
+  chat_bubbles:
 
 dev_dependencies:
   flutter_test:
