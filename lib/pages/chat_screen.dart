@@ -107,15 +107,10 @@ class _ChatScreenState extends State<ChatScreen> {
     if (user == null) {
       // Avisa o usuário sobre a falha de autenticação
       _showLoginErrorMessage();
+      return;
     }
 
-    Map<String, dynamic> messagePayload = {
-      'uid': user?.uid,
-      'userName': user?.displayName,
-      'userPhoto': user?.photoURL,
-      'text': null,
-      'imageUrl': null
-    };
+    Map<String, dynamic> messagePayload = {'uid': user.uid, 'userName': user.displayName, 'userPhoto': user.photoURL, 'text': null, 'imageUrl': null};
 
     if (message != null) {
       messagePayload['text'] = message;
@@ -124,7 +119,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Send new image to Firebase Storage
     if (imageFile != null) {
-      String filePath = 'images/${DateTime.now().millisecondsSinceEpoch.toString()}';
+      String filePath = 'images/${user.uid}/${DateTime.now().millisecondsSinceEpoch.toString()}';
       Reference storageRef = FirebaseStorage.instance.ref().child(filePath);
       UploadTask uploadTask = storageRef.putFile(File(imageFile.path));
 
