@@ -47,5 +47,24 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Get image to send in the message</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Shot photo to send in the message</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Get audio to send in the message</string>
+	<!-- Google Sign-in Section -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
+				<string>com.googleusercontent.apps.843354632716-e8mer5hpqk2dvlg34vbfgso8vdmnhcnn</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
